@@ -10,5 +10,6 @@ LazyData: true
 Imports: 
   dplyr, 
   stringi, 
-  stringr
+  stringr, 
+  lubridate
 RoxygenNote: 6.1.0

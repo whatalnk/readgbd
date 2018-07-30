@@ -9,9 +9,12 @@ read_gbd <- function(file){
   header <- parse_header(header.str)
   data <- read_data(con, header)
   close(con)
+
+  data_ <- data %>%
+    mutate(DateTime = get_datetime_column(header))
   ret <- list(
     header = header,
-    data = data
+    data = data_
   )
   ret
 }
@@ -107,5 +110,41 @@ read_data <- function(con, header){
   m <- matrix(data, ncol=4, byrow = TRUE)
   colnames(m) <- col_names
   ret <- as_data_frame(m)
+  ret
+}
+
+#' get datetime column
+#'
+#' get datetime column based on Stop Time (header$Measure$$Time > Stop) and Trigger Time ($Measure$$Time > Trigger). tz= "UTC"
+#'
+#' @importFrom lubridate parse_date_time
+#' @param header header
+#' @return POSIXct
+get_datetime_column <- function(header){
+  time.stop <- parse_date_time(header$Measure$Time$Stop, orders = "%Y-%m-%d, %H:%M:%S")
+  time.trigger <- parse_date_time(header$Measure$Time$Trigger, orders = "%Y-%m-%d, %H:%M:%S")
+  s <- header$Common$Data$Sample
+  ret <- seq(time.trigger, time.stop, by = sampling_interval(s))
+  ret
+}
+#' get sampling interval
+#'
+#' @importFrom lubridate milliseconds seconds minutes hours
+#' @param s header$Common$$Data > Sample
+#' @return Period
+sampling_interval <- function(s){
+  if (str_detect(s, "ms")){
+    num <- str_replace(s, "ms", "") %>% as.integer()
+    ret <- milliseconds(num)
+  } else if (str_detect(s, "s")){
+    num <- str_replace(s, "s", "") %>% as.integer()
+    ret <- seconds(num)
+  } else if (str_detect(s, "min")){
+    num <- str_replace(s, "min", "") %>% as.integer()
+    ret <- minutes(num)
+  } else if (str_detect(s, "h")) {
+    num <- str_replace(s, "h", "") %>% as.integer()
+    ret <- hours(num)
+  }
   ret
 }
