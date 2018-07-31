@@ -24,7 +24,6 @@ read_gbd <- function(file){
 
 #' read header region
 #'
-#' @rdname read_header
 #' @param con file connection
 #' @return character
 #' @keywords internal
@@ -45,7 +44,6 @@ read_header <- function(con){
 }
 #' parse header region
 #'
-#' @rdname parse_header
 #' @param header.str header reagion read by read_header()
 #' @return list
 #' @keywords internal
@@ -97,7 +95,6 @@ parse_header <- function(header.str){
 
 #' read data region
 #'
-#' @rdname read_data
 #' @param con file connection
 #' @param header header
 #' @return tibble
