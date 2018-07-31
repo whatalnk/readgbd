@@ -4,7 +4,15 @@
 \alias{parse_amp}
 \title{parse Amp}
 \usage{
-parse_amp(header, CH)
+parse_amp(Amp, CH)
+}
+\arguments{
+\item{Amp}{header$Amp}
+
+\item{CH}{Channel}
+}
+\value{
+named character
 }
 \description{
 offset: undocumented

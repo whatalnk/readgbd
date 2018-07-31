@@ -4,7 +4,13 @@
 \alias{parse_range}
 \title{parse range of Amp}
 \usage{
-parse_range()
+parse_range(range)
+}
+\arguments{
+\item{range}{header$Amp$[[CH]]}
+}
+\value{
+list
 }
 \description{
 parse range of Amp

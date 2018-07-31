@@ -11,7 +11,9 @@ read_gbd <- function(file){
   close(con)
 
   data_ <- data %>%
-    mutate(DateTime = get_datetime_column(header))
+    mutate(DateTime = get_datetime_column(header)) %>%
+    select(DateTime, everything()) %>%
+    convert_data(header)
   ret <- list(
     header = header,
     data = data_
@@ -159,38 +161,188 @@ GBD_OF_V_U <- 32764
 #' Lower: -110% of lower full scale (-7FFF)
 GBD_OF_V_L <- -32767
 
+#' convert data
+#'
+#' @param data data
+#' @param header header
+#' @return tibble
+convert_data <- function(data, header){
+  ret <- colnames(data) %>% set_names() %>%
+    purrr::map(~ convert_variable(.x, data[[.x]], header))
+  ret %>%
+    as_data_frame()
+}
+
+convert_variable <- function(ch, v, header){
+  if (!str_detect(ch, "^CH")) {
+    ret <- v
+  } else {
+    amp <- parse_amp(header$Amp, ch)
+    if (amp["input"] == "DC") {
+      range <- parse_range(amp[["range"]])
+      span <- parse_span_ad(header$Measure$Span[[ch]], range)
+      ret <- convert_voltage(v, range)
+      unit <- range$unit
+    } else if (amp["input"] == "TEMP") {
+      span <- parse_span_temp(header$Measure$Span[[ch]])
+      ret <- convert_temperature(v, span)
+      unit <- header$Common$Data$TempUnit
+    } else {
+      span <- c(0, 0)
+      ret <- v
+      unit <- "Unknown"
+    }
+    print(str_glue("Span for {ch}: {span[1]} -- {span[2]} {unit}"))
+  }
+
+  ret
+}
+
 #' Convert voltage value
 #'
-convert_voltage <- function(v, ch, header){
+#' @param v column of data which stores voltage
+#' @param range returned value of parse_range()
+#' @return numeric
+convert_voltage <- function(v, range){
   p1 <- v >= GBD_OF_V_U
   p2 <- v <= GBD_OF_V_L
-  v_ <- if_else(p1 | p2, NA_real_, v)
-  range <- header$Amp[[ch]]
+  v_ <- as.numeric(v)
+  ret <- if_else(p1 | p2, NA_real_, v_)
+
+  # Conversion of Voltage Values
+  if (range[["base"]] == 1){
+    ret <- ret / 2
+  } else if (range[["base"]] == 2) {
+    ret <- ret / 1
+  } else if (range[["base"]] == 5){
+    ret <- ret / 4
+  }
+
+  # Conversion of the Decimal Point Position
+  if (range[["range"]] < 50) {
+    ret <- ret / 1000
+  } else if (range[["range"]] < 500) {
+    ret <- ret / 100
+  } else if (range[["range"]] < 5000) {
+    ret <- ret / 10
+  } else if (range[["range"]] < 50000) {
+    ret <- ret / 1
+  } else {
+    ret <- ret * 10
+  }
+  if (range[["unit"]] == "V"){
+    ret <- ret / 1000
+  }
+
+  ret
 }
 
 #' Convert temperature value
 #'
-convert_temperature <- function(x, header){
-
+#' @param v column of data which stores temperature
+#' @param span returned value of parse_span()
+#' @return numeric
+convert_temperature <- function(v, span){
+  v_ <- v / 10
+  p1 <- v_ > span$upper
+  p2 <- v_ < span$lower
+  ret <- if_else(p1 | p2, NA_real_, v_)
+  ret
 }
 
 #' parse Amp
 #'
 #' offset: undocumented
 #' @importFrom rlang set_names
-parse_amp <- function(header, CH){
-  ret <-  header$Amp[[CH]] %>%
-    stringr::str_split(pattern=",") %>%
+#' @param Amp header$Amp
+#' @param CH Channel
+#' @return named character
+parse_amp <- function(Amp, CH){
+  ret <-  Amp[[CH]] %>%
+    str_split(pattern=",") %>%
     .[[1]] %>%
-    stringr::str_trim(side="both") %>%
-    rlang::set_names(c("type", "input", "range", "filter", "thermocouple", "offset"))
+    str_trim(side="both") %>%
+    set_names(c("type", "input", "range", "filter", "thermocouple", "offset"))
   ret
 }
 
 #' parse range of Amp
 #'
-#'
-parse_range <- function(){
+#' @param range header$Amp$[[CH]]
+#' @return list
+parse_range <- function(range){
+  if (str_detect(range, "mV")) {
+    v_unit <- "mV"
+    n <- str_replace(range, "mV", "") %>% as.integer()
+    v_base <- get_base(n)
+    v_range <- n
+  } else if (str_detect(range, "V")){
+    if (str_detect(range, "-")) {
+      v_base <- 5
+      v_range <- v_base * 1000
+    } else {
+      n <- str_replace(range, "V", "") %>% as.integer()
+      v_base <- get_base(n)
+      v_range <- n * 1000
+    }
+    v_unit <- "V"
+  }
 
+  list(
+    base = v_base,
+    range = v_range,
+    unit = v_unit
+  )
 }
 
+#' get base
+#'
+#' @param n integer
+#' @return numeric
+get_base <- function(n){
+  while (n %/% 10 != 0) {
+    n <- n %/% 10
+  }
+  n
+}
+
+#' parse span
+#'
+#' @param span header$Measure$Span[[CH]]
+#' @return numeric
+parse_span <- function(span){
+  ret <- str_split(span, ",") %>%
+    .[[1]] %>%
+    str_trim() %>%
+    as.numeric()
+  ret
+}
+
+#' parse span ad
+#'
+#' @param span header$Measure$Span[[CH]]
+#' @param range returned value of parse_range()
+#' @return list
+parse_span_ad <- function(span, range){
+  span_ <- parse_span(span)
+  span_ad <- convert_voltage(span_[1:2], range)
+
+  list(
+    lower = span_ad[1],
+    upper = span_ad[2]
+  )
+}
+
+#' parse span temp
+#'
+#' @param span header$Measure$Span[[CH]]
+#' @return list
+parse_span_temp <- function(span){
+  span_ <- parse_span(span)
+  span_temp <- span_ / 10
+
+  list(
+    lower = span_temp[1],
+    upper = span_temp[2]
+  )
+}

@@ -4,7 +4,15 @@
 \alias{convert_temperature}
 \title{Convert temperature value}
 \usage{
-convert_temperature(x, header)
+convert_temperature(v, span)
+}
+\arguments{
+\item{v}{column of data which stores temperature}
+
+\item{span}{returned value of parse_span()}
+}
+\value{
+numeric
 }
 \description{
 Convert temperature value

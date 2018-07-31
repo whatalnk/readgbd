@@ -13,5 +13,6 @@ Imports:
   stringi, 
   stringr, 
   lubridate, 
-  rlang
+  rlang, 
+  purrr
 RoxygenNote: 6.1.0
