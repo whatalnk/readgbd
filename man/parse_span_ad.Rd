@@ -17,3 +17,4 @@ list
 \description{
 parse span ad
 }
+\keyword{internal}

@@ -3,12 +3,12 @@
 \docType{data}
 \name{GBD_OF_V_L}
 \alias{GBD_OF_V_L}
-\title{Value represent overflow}
+\title{value represent overflow}
 \format{An object of class \code{numeric} of length 1.}
 \usage{
 GBD_OF_V_L
 }
 \description{
-Lower: -110% of lower full scale (-7FFF)
+lower: -110% of lower full scale (-7FFF)
 }
-\keyword{datasets}
+\keyword{internal}

@@ -10,7 +10,7 @@ read_gbd(file)
 \item{file}{Path to gbd data}
 }
 \value{
-list
+list of header (list) and data (tibble)
 }
 \description{
 read gbd file

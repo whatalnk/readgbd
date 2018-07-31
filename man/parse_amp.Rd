@@ -17,3 +17,4 @@ named character
 \description{
 offset: undocumented
 }
+\keyword{internal}

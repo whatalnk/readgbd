@@ -2,7 +2,7 @@
 % Please edit documentation in R/read_gbd.R
 \name{convert_temperature}
 \alias{convert_temperature}
-\title{Convert temperature value}
+\title{convert temperature value}
 \usage{
 convert_temperature(v, span)
 }
@@ -15,5 +15,6 @@ convert_temperature(v, span)
 numeric
 }
 \description{
-Convert temperature value
+convert temperature value
 }
+\keyword{internal}

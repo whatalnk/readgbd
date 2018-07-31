@@ -15,3 +15,4 @@ POSIXct
 \description{
 get datetime column based on Stop Time (header$Measure$$Time > Stop) and Trigger Time ($Measure$$Time > Trigger). tz= "UTC"
 }
+\keyword{internal}

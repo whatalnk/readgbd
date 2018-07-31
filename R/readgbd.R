@@ -1,6 +1,6 @@
 #' readgbd
 #'
-#' Import *.gbd file
+#' Read Graphtech Binary Data file (*.gbd).
 #'
 #' @name readgbd
 #' @docType package

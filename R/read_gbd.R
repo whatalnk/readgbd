@@ -1,7 +1,7 @@
 #' read gbd file
 #'
 #' @param file Path to gbd data
-#' @return list
+#' @return list of header (list) and data (tibble)
 #' @export
 read_gbd <- function(file){
   con <- file(file, "rb")
@@ -27,7 +27,7 @@ read_gbd <- function(file){
 #' @rdname read_header
 #' @param con file connection
 #' @return character
-#' @export
+#' @keywords internal
 read_header <- function(con){
   ret <- ""
   header_part <- readChar(con, 4096, useBytes = TRUE)
@@ -48,7 +48,7 @@ read_header <- function(con){
 #' @rdname parse_header
 #' @param header.str header reagion read by read_header()
 #' @return list
-#' @export
+#' @keywords internal
 parse_header <- function(header.str){
   header.line <- str_split(header.str, pattern="\r\n")
   ret <- list()
@@ -101,7 +101,7 @@ parse_header <- function(header.str){
 #' @param con file connection
 #' @param header header
 #' @return tibble
-#' @export
+#' @keywords internal
 read_data <- function(con, header){
   n_row <- as.integer(header$Common$Data$Counts)
   col_names <- header$Common$Data$Order %>%
@@ -122,6 +122,7 @@ read_data <- function(con, header){
 #' @importFrom lubridate parse_date_time
 #' @param header header
 #' @return POSIXct
+#' @keywords internal
 get_datetime_column <- function(header){
   time.stop <- parse_date_time(header$Measure$Time$Stop, orders = "%Y-%m-%d, %H:%M:%S")
   time.trigger <- parse_date_time(header$Measure$Time$Trigger, orders = "%Y-%m-%d, %H:%M:%S")
@@ -134,6 +135,7 @@ get_datetime_column <- function(header){
 #' @importFrom lubridate milliseconds seconds minutes hours
 #' @param s header$Common$$Data > Sample
 #' @return Period
+#' @keywords internal
 sampling_interval <- function(s){
   if (str_detect(s, "ms")){
     num <- str_replace(s, "ms", "") %>% as.integer()
@@ -151,14 +153,16 @@ sampling_interval <- function(s){
   ret
 }
 
-#' Value represent overflow
+#' value represent overflow
 #'
-#' Upper: 110% of upper full scale (+7FCC)
+#' upper: 110% of upper full scale (+7FCC)
+#' @keywords internal
 GBD_OF_V_U <- 32764
 
-#' Value represent overflow
+#' value represent overflow
 #'
-#' Lower: -110% of lower full scale (-7FFF)
+#' lower: -110% of lower full scale (-7FFF)
+#' @keywords internal
 GBD_OF_V_L <- -32767
 
 #' convert data
@@ -166,6 +170,7 @@ GBD_OF_V_L <- -32767
 #' @param data data
 #' @param header header
 #' @return tibble
+#' @keywords internal
 convert_data <- function(data, header){
   ret <- colnames(data) %>% set_names() %>%
     purrr::map(~ convert_variable(.x, data[[.x]], header))
@@ -173,6 +178,13 @@ convert_data <- function(data, header){
     as_data_frame()
 }
 
+#' convert each variables
+#'
+#' @param ch channel name
+#' @param v variable; column of data
+#' @param header header
+#' @return atomic vector
+#' @keywords internal
 convert_variable <- function(ch, v, header){
   if (!str_detect(ch, "^CH")) {
     ret <- v
@@ -198,11 +210,12 @@ convert_variable <- function(ch, v, header){
   ret
 }
 
-#' Convert voltage value
+#' convert voltage value
 #'
 #' @param v column of data which stores voltage
 #' @param range returned value of parse_range()
 #' @return numeric
+#' @keywords internal
 convert_voltage <- function(v, range){
   p1 <- v >= GBD_OF_V_U
   p2 <- v <= GBD_OF_V_L
@@ -237,11 +250,12 @@ convert_voltage <- function(v, range){
   ret
 }
 
-#' Convert temperature value
+#' convert temperature value
 #'
 #' @param v column of data which stores temperature
 #' @param span returned value of parse_span()
 #' @return numeric
+#' @keywords internal
 convert_temperature <- function(v, span){
   v_ <- v / 10
   p1 <- v_ > span$upper
@@ -257,6 +271,7 @@ convert_temperature <- function(v, span){
 #' @param Amp header$Amp
 #' @param CH Channel
 #' @return named character
+#' @keywords internal
 parse_amp <- function(Amp, CH){
   ret <-  Amp[[CH]] %>%
     str_split(pattern=",") %>%
@@ -270,6 +285,7 @@ parse_amp <- function(Amp, CH){
 #'
 #' @param range header$Amp$[[CH]]
 #' @return list
+#' @keywords internal
 parse_range <- function(range){
   if (str_detect(range, "mV")) {
     v_unit <- "mV"
@@ -299,6 +315,7 @@ parse_range <- function(range){
 #'
 #' @param n integer
 #' @return numeric
+#' @keywords internal
 get_base <- function(n){
   while (n %/% 10 != 0) {
     n <- n %/% 10
@@ -310,6 +327,7 @@ get_base <- function(n){
 #'
 #' @param span header$Measure$Span[[CH]]
 #' @return numeric
+#' @keywords internal
 parse_span <- function(span){
   ret <- str_split(span, ",") %>%
     .[[1]] %>%
@@ -323,6 +341,7 @@ parse_span <- function(span){
 #' @param span header$Measure$Span[[CH]]
 #' @param range returned value of parse_range()
 #' @return list
+#' @keywords internal
 parse_span_ad <- function(span, range){
   span_ <- parse_span(span)
   span_ad <- convert_voltage(span_[1:2], range)
@@ -337,6 +356,7 @@ parse_span_ad <- function(span, range){
 #'
 #' @param span header$Measure$Span[[CH]]
 #' @return list
+#' @keywords internal
 parse_span_temp <- function(span){
   span_ <- parse_span(span)
   span_temp <- span_ / 10

@@ -15,3 +15,4 @@ numeric
 \description{
 parse span
 }
+\keyword{internal}

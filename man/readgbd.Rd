@@ -6,5 +6,5 @@
 \alias{readgbd-package}
 \title{readgbd}
 \description{
-Import *.gbd file
+Read Graphtech Binary Data file (*.gbd).
 }

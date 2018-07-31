@@ -15,3 +15,4 @@ Period
 \description{
 get sampling interval
 }
+\keyword{internal}

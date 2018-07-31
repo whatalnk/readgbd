@@ -3,12 +3,12 @@
 \docType{data}
 \name{GBD_OF_V_U}
 \alias{GBD_OF_V_U}
-\title{Value represent overflow}
+\title{value represent overflow}
 \format{An object of class \code{numeric} of length 1.}
 \usage{
 GBD_OF_V_U
 }
 \description{
-Upper: 110% of upper full scale (+7FCC)
+upper: 110% of upper full scale (+7FCC)
 }
-\keyword{datasets}
+\keyword{internal}

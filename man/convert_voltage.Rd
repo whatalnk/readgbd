@@ -2,7 +2,7 @@
 % Please edit documentation in R/read_gbd.R
 \name{convert_voltage}
 \alias{convert_voltage}
-\title{Convert voltage value}
+\title{convert voltage value}
 \usage{
 convert_voltage(v, range)
 }
@@ -15,5 +15,6 @@ convert_voltage(v, range)
 numeric
 }
 \description{
-Convert voltage value
+convert voltage value
 }
+\keyword{internal}

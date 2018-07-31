@@ -15,3 +15,4 @@ list
 \description{
 parse range of Amp
 }
+\keyword{internal}
