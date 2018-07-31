@@ -148,3 +148,49 @@ sampling_interval <- function(s){
   }
   ret
 }
+
+#' Value represent overflow
+#'
+#' Upper: 110% of upper full scale (+7FCC)
+GBD_OF_V_U <- 32764
+
+#' Value represent overflow
+#'
+#' Lower: -110% of lower full scale (-7FFF)
+GBD_OF_V_L <- -32767
+
+#' Convert voltage value
+#'
+convert_voltage <- function(v, ch, header){
+  p1 <- v >= GBD_OF_V_U
+  p2 <- v <= GBD_OF_V_L
+  v_ <- if_else(p1 | p2, NA_real_, v)
+  range <- header$Amp[[ch]]
+}
+
+#' Convert temperature value
+#'
+convert_temperature <- function(x, header){
+
+}
+
+#' parse Amp
+#'
+#' offset: undocumented
+#' @importFrom rlang set_names
+parse_amp <- function(header, CH){
+  ret <-  header$Amp[[CH]] %>%
+    stringr::str_split(pattern=",") %>%
+    .[[1]] %>%
+    stringr::str_trim(side="both") %>%
+    rlang::set_names(c("type", "input", "range", "filter", "thermocouple", "offset"))
+  ret
+}
+
+#' parse range of Amp
+#'
+#'
+parse_range <- function(){
+
+}
+
