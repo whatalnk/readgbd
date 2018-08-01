@@ -2,7 +2,13 @@
 
 Read Graphtech Binary Data file (*.gbd).
 
-## Note
+## Install
+
+```
+devtools::install_github("whatalnk/readgbd")
+```
+
+## Notes
 
 ### Devices
 
