@@ -12,7 +12,6 @@ Imports:
   dplyr, 
   stringi, 
   stringr, 
-  lubridate, 
-  rlang, 
-  purrr
+  purrr, 
+  lubridate
 RoxygenNote: 6.1.0

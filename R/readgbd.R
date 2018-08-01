@@ -1,8 +1,3 @@
-#' readgbd
-#'
-#' Read Graphtech Binary Data file (*.gbd).
-#'
-#' @name readgbd
-#' @docType package
-#' @import dplyr stringi stringr
-NULL
+#' @keywords internal
+#' @import   dplyr stringi stringr purrr
+"_PACKAGE"

@@ -170,8 +170,7 @@ GBD_OF_V_L <- -32767
 #' @keywords internal
 convert_data <- function(data, header){
   ret <- colnames(data) %>% set_names() %>%
-    purrr::map(~ convert_variable(.x, data[[.x]], header))
-  ret %>%
+    map(~ convert_variable(.x, data[[.x]], header)) %>%
     as_data_frame()
 }
 
@@ -264,7 +263,6 @@ convert_temperature <- function(v, span){
 #' parse Amp
 #'
 #' offset: undocumented
-#' @importFrom rlang set_names
 #' @param Amp header$Amp
 #' @param CH Channel
 #' @return named character
