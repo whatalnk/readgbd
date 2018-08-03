@@ -101,6 +101,7 @@ parse_header <- function(header.str){
 #' @keywords internal
 read_data <- function(con, header){
   n_row <- as.integer(header$Common$Data$Counts)
+  print(str_glue("Number of measurement: {n_row}"))
   col_names <- header$Common$Data$Order %>%
     {str_split(string =., pattern=",")} %>%
     {str_trim(string = .[[1]], side="both")}
@@ -121,10 +122,15 @@ read_data <- function(con, header){
 #' @return POSIXct
 #' @keywords internal
 get_datetime_column <- function(header){
+  time.start <- parse_date_time(header$Measure$Time$Start, orders = "%Y-%m-%d, %H:%M:%S")
   time.stop <- parse_date_time(header$Measure$Time$Stop, orders = "%Y-%m-%d, %H:%M:%S")
   time.trigger <- parse_date_time(header$Measure$Time$Trigger, orders = "%Y-%m-%d, %H:%M:%S")
+  print(str_glue("Start: {time.start}"))
+  print(str_glue("End: {time.stop}"))
+  print(str_glue("Trigger: {time.trigger}"))
   s <- header$Common$Data$Sample
-  ret <- seq(time.trigger, time.stop, by = sampling_interval(s))
+  n_row <- as.integer(header$Common$Data$Counts)
+  ret <- seq(time.trigger, time.trigger + (n_row - 1) * sampling_interval(s), by = sampling_interval(s))
   ret
 }
 #' get sampling interval
