@@ -2,6 +2,10 @@
 #'
 #' @param file Path to gbd data
 #' @return list of header (list) and data (tibble)
+#' @examples
+#' gbd_data <- read_gbd(path_to_gbd_data)
+#' header <- gbd_data[["header"]]
+#' data <- gbd_data[["data"]]
 #' @export
 read_gbd <- function(file){
   con <- file(file, "rb")

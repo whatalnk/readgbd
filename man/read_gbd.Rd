@@ -15,3 +15,8 @@ list of header (list) and data (tibble)
 \description{
 read gbd file
 }
+\examples{
+gbd_data <- read_gbd(path_to_gbd_data)
+header <- gbd_data[["header"]]
+data <- gbd_data[["data"]]
+}

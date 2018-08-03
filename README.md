@@ -10,6 +10,15 @@ Imperimentation of [GL220 / GL820 GBD File Specification Sheet](http://produkte.
 devtools::install_github("whatalnk/readgbd")
 ```
 
+## Usage
+
+```
+gbd_data <- read_gbd(path_to_gbd_data)
+header <- gbd_data[["header"]]
+data <- gbd_data[["data"]]
+```
+
+
 ## Notes
 
 ### Devices
